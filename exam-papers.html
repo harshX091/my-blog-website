@@ -71,32 +71,42 @@
     <ul id="papers-list"></ul>
   </main>
 
-  <script>
-    async function loadPapers() {
-      try {
-        const response = await fetch("papers/papers.json");
-        const papers = await response.json();
-        const list = document.getElementById("papers-list");
+ <script>
+  async function loadPapers() {
+    try {
+      const response = await fetch("papers/papers.json");
+      const papers = await response.json();
+      const list = document.getElementById("papers-list");
 
-        papers.forEach(paper => {
-          const li = document.createElement("li");
-          li.innerHTML = `
-            <strong>${paper.title}</strong><br>
-            <a href="papers/${paper.file}" target="_blank">View Online</a> | 
-            <a href="papers/${paper.file}" download>Download</a>
-            <div class="embed-container">
-              <embed src="papers/${paper.file}" type="application/pdf">
-            </div>
-          `;
-          list.appendChild(li);
-        });
-      } catch (error) {
-        console.error("Error loading papers:", error);
-      }
+      papers.forEach(paper => {
+        const li = document.createElement("li");
+
+        // Create PDF embed element
+        const embedHTML = `
+          <div class="embed-container">
+            <embed src="papers/${paper.file}" type="application/pdf" onerror="this.outerHTML='<p style=&quot;color:red;font-weight:bold&quot;>❌ Error: Could not load ${paper.file}</p>'">
+          </div>
+        `;
+
+        li.innerHTML = `
+          <strong>${paper.title}</strong><br>
+          <a href="papers/${paper.file}" target="_blank">View Online</a> | 
+          <a href="papers/${paper.file}" download>Download</a>
+          ${embedHTML}
+        `;
+
+        list.appendChild(li);
+      });
+    } catch (error) {
+      console.error("Error loading papers.json:", error);
+      document.getElementById("papers-list").innerHTML =
+        "<p style='color:red;font-weight:bold'>❌ Failed to load papers.json</p>";
     }
+  }
 
-    loadPapers();
-  </script>
+  loadPapers();
+</script>
+
 </body>
 </html>
 
